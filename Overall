@@ -1,0 +1,191 @@
+🐧 Linux Directory Deep Dive for Pentesting & Security
+/home • /etc • /var • /bin • /usr • /tmp • /opt • /run
+📁 1. /home — User Home Directories
+
+Stores personal user data, settings, SSH keys, and history.
+
+Common Contents
+
+Documents/
+
+Downloads/
+
+.ssh/ → SSH keys
+
+.bash_history → command history
+
+.config/
+
+.local/share/
+
+Pentesting Use
+
+Steal SSH keys: ~/.ssh/id_rsa
+
+Read command history for passwords
+
+Check for saved API keys or tokens
+
+Look for scripts or credentials in plaintext
+
+Find sensitive downloads or notes
+
+📁 2. /etc — System-Wide Configuration Files
+
+The brain of the system: configs for services, users, auth, networking, and security.
+
+Important Files
+File	Purpose
+/etc/passwd	User accounts, shells
+/etc/shadow	Password hashes + aging
+/etc/ssh/sshd_config	SSH security settings
+/etc/sudoers	Privileges and sudo rules
+/etc/crontab	Scheduled tasks
+/etc/network/	Network configs
+Pentesting Use
+
+Dump password hashes for cracking
+
+Find SSH misconfigurations (root login, weak auth)
+
+Escalate via sudo misconfigs
+
+Abuse writable cron files
+
+Extract stored credentials
+
+📁 3. /var — Variable, Changing System Data
+
+Contains logs, temporary data, spooled jobs, web files, and databases.
+
+Key Subdirectories
+Directory	Purpose
+/var/log/	Authentication logs, system logs
+/var/www/	Web server files
+/var/spool/cron/	Cron jobs waiting to run
+/var/tmp/	Temp files surviving reboot
+/var/lib/	Databases and service data
+Pentesting Use
+
+Analyze logs for credentials or errors
+
+Upload web shells to /var/www
+
+Escalate via cron job manipulation
+
+Pull database files from /var/lib/mysql
+
+Use /var/tmp for payload persistence
+
+📁 4. /bin — Essential User Binaries
+
+Contains critical commands required for basic system operation (used by all users).
+
+Examples
+
+ls
+
+cp
+
+mv
+
+cat
+
+chmod
+
+grep
+
+Pentesting Use
+
+Understand what tools exist on the target
+
+Detect restricted shells (missing commands)
+
+Check for malicious binary replacement (PATH hijacks)
+
+📁 5. /usr — User Applications & Software
+
+Most user-installed software lives here.
+
+Subdirectories
+
+/usr/bin → user commands
+
+/usr/sbin → admin commands
+
+/usr/lib → libraries
+
+/usr/share → documentation, icons, etc.
+
+Pentesting Use
+
+Enumerate installed programs
+
+Look for outdated or vulnerable software
+
+Check for hidden admin tools in /usr/sbin
+
+📁 6. /tmp — Temporary Files (World-Writable)
+
+Cleared at reboot; sticky-bit directory.
+
+Pentesting Use
+
+Upload malicious scripts
+
+Privilege escalation if sticky bit misconfigured
+
+Symlink attacks
+
+Temporary file poisoning
+
+Example permissions (normal):
+
+drwxrwxrwt  /tmp
+
+📁 7. /opt — Optional / Third-Party Software
+
+Where custom or commercial apps get installed.
+
+Pentesting Use
+
+Look for apps storing configs or secrets
+
+Credentials in config files
+
+Outdated software ripe for exploitation
+
+Web apps installed here
+
+📁 8. /run — Runtime Data
+
+Replaces old /var/run.
+
+Contains:
+
+PID files
+
+Lock files
+
+Unix sockets
+
+Service runtime data
+
+Pentesting Use
+
+Access running service info
+
+Hijack or interact with sockets
+
+Check process ownership and permissions
+
+🔥 Summary Table
+Directory	Contains	Pentesting Value
+/home	User files, keys, histories	Credential theft, recon
+/etc	System configs	Hashes, sudo, SSH, cron
+/var	Logs, web files, DBs	Web shells, logs, cron, data theft
+/bin	Essential binaries	Command availability, PATH attacks
+/usr	User software	Outdated software, tools
+/tmp	Temp files	Escalation, uploads
+/opt	Third-party apps	Secrets, misconfigs
+/run	Runtime data	PIDs, sockets, service info
