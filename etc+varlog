@@ -1,0 +1,292 @@
+🐧 Linux Directory Deep Dive
+/home • /etc • /var
+
+A complete guide for cybersecurity, pentesting, and system administration.
+
+📁 1. /home — User Home Directories
+
+/home is where all non-root users store their personal files, configs, SSH keys, scripts, and application settings.
+
+Example:
+
+/home/omni/
+/home/user1/
+/home/dev/
+
+🔍 What’s Inside /home/<username>
+
+Typical structure:
+
+Documents/ – personal files
+
+Downloads/ – downloaded tools (often sensitive!)
+
+.ssh/ – SSH keys (critical for pentesting)
+
+.bash_history – all terminal commands the user ran
+
+.config/ – app configurations
+
+.cache/ – cached program data
+
+.local/share/ – app data (browsers, tokens, secrets)
+
+🔥 Pentesting Value
+✔️ .ssh/authorized_keys, id_rsa, id_rsa.pub
+
+If readable → instant credential theft
+
+Reusable across multiple machines if passwords reused
+
+✔️ .bash_history
+
+Often contains:
+
+Passwords typed incorrectly
+
+Database logins
+
+sudo commands
+
+API keys
+
+Internal network recon commands
+
+Example leak:
+
+mysql -u root -pMyPassword123
+
+✔️ Misconfigured permissions
+
+If /home/user is world-readable:
+
+ls -ld /home/user
+
+
+You can access:
+
+private SSH keys
+
+scripts containing secrets
+
+cronjob scripts
+
+personal notes containing passwords
+
+🧠 Summary
+
+/home = user data, keys, histories, configs → goldmine for escalation + lateral movement.
+
+📁 2. /etc — System Configuration Files
+
+/etc contains all configuration files for the system and installed services.
+
+Think of it as:
+
+👉 “The brain and settings of the operating system.”
+
+🔧 Major Subdirectories
+📌 /etc/passwd
+
+User accounts
+
+Shells
+
+UIDs and GIDs
+
+Used for login authentication
+
+World-readable
+
+Password field replaced with x
+
+Example:
+
+root:x:0:0:root:/root:/bin/bash
+
+📌 /etc/shadow
+
+Password hashes (root-only access)
+
+Password aging policies
+
+Grace periods, expiration, lockouts
+
+Example:
+
+omni:$6$abcd$HASH:19322:0:99999:7:::
+
+
+Pentesting:
+If readable → full password cracking → system takeover.
+
+📌 /etc/ssh/sshd_config
+
+SSH server config.
+
+Key directives:
+
+PermitRootLogin no
+PasswordAuthentication no
+PubkeyAuthentication yes
+
+
+Misconfigurations allow:
+
+Root SSH login
+
+Password brute forcing
+
+Weak ciphers
+
+Lateral movement opportunities
+
+📌 /etc/sudoers
+
+Controls admin privileges.
+
+Dangerous example:
+
+user ALL=(ALL) NOPASSWD: ALL
+
+
+→ Instant root access.
+
+📌 /etc/crontab, /etc/cron.*
+
+Scheduled jobs.
+
+Weak permissions allow cronjob-based privilege escalation.
+
+📌 /etc/network/interfaces or /etc/netplan
+
+Network config files.
+
+Useful for mapping internal networks.
+
+🔥 Pentesting Importance
+
+Leaked hashes → privilege escalation
+
+SSH misconfigs → initial access
+
+Sudo misconfigs → root
+
+Cron misconfigs → persistence
+
+App configs → API keys, DB passwords
+
+🧠 Summary
+
+/etc = system-wide settings, password hashes, SSH rules, user permissions → top-tier privesc target.
+
+📁 3. /var — Variable, Changing System Data
+
+/var contains any files that change continuously:
+
+logs
+
+caches
+
+web files
+
+mail
+
+databases
+
+spool jobs
+
+runtime data
+
+🧩 Important Subdirectories
+📌 /var/log
+
+All logs — critical for auditing & recon.
+
+Examples:
+
+/var/log/auth.log — SSH logins, sudo attempts
+
+/var/log/syslog or /var/log/messages — system events
+
+/var/log/apache2/ — web server logs
+
+/var/log/secure — auth logs on RHEL/CentOS
+
+Pentesting value:
+
+Brute force detection
+
+Password leaks
+
+Server misconfigurations
+
+Application errors
+
+Internal IPs
+
+📌 /var/www/
+
+Default Apache/Nginx web root.
+
+Contains:
+
+index.html
+
+Web apps
+
+Uploads
+
+Backups
+
+Source code
+
+Pentesting:
+
+Upload shells
+
+Analyze source
+
+Exploit file inclusions
+
+Find config leaks
+
+📌 /var/spool/cron
+
+Cron jobs waiting to run.
+
+Weak permissions = root escalation.
+
+📌 /var/tmp
+
+Temporary files that persist after reboot.
+
+Great place to stash payloads.
+
+📌 /var/lib
+
+Application databases:
+
+/var/lib/mysql/ — MySQL
+
+/var/lib/docker/ — Docker containers
+
+/var/lib/dpkg/ — installed packages
+
+Often stores:
+
+plaintext config
+
+database files
+
+cached credentials
+
+🧠 Summary
+
+/var = logs, websites, databases, cronjobs, persistent temp files → massive value for attackers & administrators.
+
+🧩 FINAL SUMMARY TABLE
+Directory	Purpose	Pentesting Value
+/home	User directories, keys, history	SSH keys, password leaks, scripts, recon
+/etc	System configs	Hashes, SSH configs, sudoers, cronjobs
+/var	Logs, web files, databases	Logs, web shells, DB leaks, cron, persistence
